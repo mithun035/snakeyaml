@@ -15,6 +15,9 @@ package biz.source_code.base64Coder;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+
 import junit.framework.TestCase;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
@@ -26,6 +29,37 @@ public class Base64CoderTest extends TestCase {
     check("aa", "YWE=");
     check("a=", "YT0=");
     check("", "");
+  }
+
+  public void testEncodeString(){
+    List<String> key = List.of("apple", "orange", "mango");
+    List<String> encodedKey = List.of("YXBwbGU=", "b3Jhbmdl", "bWFuZ28=");
+
+    for (int iter = 0; iter < key.size(); ++iter){
+      assertEquals(Base64Coder.encodeString(key.get(iter)), encodedKey.get(iter));
+    }
+  }
+
+  public void testDecodeString(){
+    List<String> encodedKey = List.of("YXBwbGU=", "b3Jhbmdl", "bWFuZ28=");
+    List<String> key = List.of("apple", "orange", "mango");
+
+    for (int iter = 0; iter < key.size(); ++iter){
+      assertEquals(Base64Coder.decodeString(encodedKey.get(iter)), key.get(iter));
+    }
+  }
+
+  public void testThrowUnsupportedEncodingOnEncodeString(){
+
+    String key = "apple";
+
+    try{
+      byte[] keyBytes = key.getBytes("UTF_8");
+      String encodedKey = Arrays.toString(Base64Coder.encode(keyBytes));
+    } catch (UnsupportedEncodingException e) {
+      assertTrue("Not a valid charset for encoding: UTF_8", e.getMessage().contains("UTF_8"));
+    }
+
   }
 
   public void testFailure1() throws UnsupportedEncodingException {

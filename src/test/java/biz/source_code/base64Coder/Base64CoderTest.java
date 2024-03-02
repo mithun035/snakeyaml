@@ -19,10 +19,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.TestCase;
+import org.junit.Test;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-public class Base64CoderTest extends TestCase {
+import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
+public class Base64CoderTest {
+
+  @Test
   public void testDecode() throws UnsupportedEncodingException {
     check("Aladdin:open sesame", "QWxhZGRpbjpvcGVuIHNlc2FtZQ==");
     check("a", "YQ==");
@@ -31,15 +36,17 @@ public class Base64CoderTest extends TestCase {
     check("", "");
   }
 
+  @Test
   public void testEncodeString(){
-    List<String> key = List.of("apple", "orange", "mango");
-    List<String> encodedKey = List.of("YXBwbGU=", "b3Jhbmdl", "bWFuZ28=");
+    List<String> key = List.of("apple","app.le", "orange", "mango");
+    List<String> encodedKey = List.of("YXBwbGU=","YXBwLmxl", "b3Jhbmdl", "bWFuZ28=");
 
     for (int iter = 0; iter < key.size(); ++iter){
       assertEquals(Base64Coder.encodeString(key.get(iter)), encodedKey.get(iter));
     }
   }
 
+  @Test
   public void testDecodeString(){
     List<String> encodedKey = List.of("YXBwbGU=", "b3Jhbmdl", "bWFuZ28=");
     List<String> key = List.of("apple", "orange", "mango");
@@ -49,19 +56,20 @@ public class Base64CoderTest extends TestCase {
     }
   }
 
+  @Test
   public void testThrowUnsupportedEncodingOnEncodeString(){
 
     String key = "apple";
+    String providedCharSet = "UTF_8";
+    Class<UnsupportedEncodingException> unsupportedEncodingExceptionClass = UnsupportedEncodingException.class;
 
-    try{
-      byte[] keyBytes = key.getBytes("UTF_8");
+    assertThrows(unsupportedEncodingExceptionClass, () -> {
+      byte[] keyBytes = key.getBytes(providedCharSet);
       String encodedKey = Arrays.toString(Base64Coder.encode(keyBytes));
-    } catch (UnsupportedEncodingException e) {
-      assertTrue("Not a valid charset for encoding: UTF_8", e.getMessage().contains("UTF_8"));
-    }
-
+    });
   }
 
+  @Test
   public void testFailure1() throws UnsupportedEncodingException {
     try {
       Base64Coder.decode("YQ=".toCharArray());
@@ -71,6 +79,7 @@ public class Base64CoderTest extends TestCase {
     }
   }
 
+  @Test
   public void testFailure2() throws UnsupportedEncodingException {
     checkInvalid("\tWE=");
     checkInvalid("Y\tE=");
@@ -82,6 +91,7 @@ public class Base64CoderTest extends TestCase {
     checkInvalid("YW©=");
     checkInvalid("YWE©");
   }
+
 
   private void checkInvalid(String encoded) {
     try {
